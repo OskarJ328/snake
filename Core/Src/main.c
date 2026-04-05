@@ -76,17 +76,16 @@ max7219_t led_matrix = {
 };
 
 rabbit_t rabbit = {
-	.sead = 17
+	.sead = 23
 };
 
 snake_t snake = {
   .led_matrix = &led_matrix,
-  .length = 6,
-  .body_x = {0, 1, 2, 2, 3, 4},
-  .body_y = {0, 0, 0, 1, 1, 1},
   .rabbit = &rabbit,
   .keyboard = &keyboard
 };
+
+game_state_t game_state = MENU;
 
 
 uint8_t key = 50;
@@ -142,7 +141,7 @@ int main(void)
   my_uart_init(&uart2);
   keyboard_init(&keyboard);
   max7219_init(&led_matrix);
-  snake_init(&snake);
+  
   //draw_snake(&snake);
   //max7219_set_pixel(&led_matrix, 0, 0);
   //max7219_set_pixel(&led_matrix, 3, 1);
@@ -152,13 +151,37 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {    
-    current_time = HAL_GetTick();
-    if(current_time - previous_time > 300){
-      previous_time = current_time;
-      snake_count(&snake);
-      snake_draw(&snake);
+    switch(game_state){
+    case MENU:
+      if(snake_check_keyboard(&snake) == keyENTER){
+        snake_init(&snake);
+        game_state = GAME;
+      }
+      break;
+    case GAME:
+      snake_check_direction(&snake);
+      if(current_time - previous_time > 1000){
+        previous_time = current_time;
+        snake_count(&snake);
+        snake_draw(&snake);
+      }
+      if(snake_check_keyboard(&snake) == keyENTER){
+        game_state = PAUSE;
+      }
+      if(snake.collision){
+        game_state = MENU;
+      }
+
+      break;
+      case PAUSE:
+        if(snake_check_keyboard(&snake) != keyENTER && snake_check_keyboard(&snake) != 0){
+          previous_time = current_time;
+          game_state = GAME;
+        }
+        break; 
     }
-    snake_check_direction(&snake);
+    current_time = HAL_GetTick();
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
