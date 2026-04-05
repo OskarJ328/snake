@@ -26,6 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include "my_uart.h"
 #include "keyboard.h"
+#include "snake.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,8 +69,32 @@ keyboard_t keyboard = {
   .outputs = keyboard_outputs
 };
 
+max7219_t led_matrix = {
+  .cs_pin = matrix_CS_Pin,
+  .cs_port = matrix_CS_GPIO_Port,
+  .spi_handle = &hspi1
+};
+
+rabbit_t rabbit = {
+	.sead = 17
+};
+
+snake_t snake = {
+  .led_matrix = &led_matrix,
+  .length = 6,
+  .body_x = {0, 1, 2, 2, 3, 4},
+  .body_y = {0, 0, 0, 1, 1, 1},
+  .rabbit = &rabbit,
+  .keyboard = &keyboard
+};
+
+
 uint8_t key = 50;
 uint8_t prev_key = 0;
+
+uint32_t current_time = 0;
+uint32_t previous_time = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -116,17 +141,24 @@ int main(void)
   /* USER CODE BEGIN 2 */
   my_uart_init(&uart2);
   keyboard_init(&keyboard);
+  max7219_init(&led_matrix);
+  snake_init(&snake);
+  //draw_snake(&snake);
+  //max7219_set_pixel(&led_matrix, 0, 0);
+  //max7219_set_pixel(&led_matrix, 3, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {    
-    if(key != prev_key){
-      my_uart_printf(&uart2, "%d\n", key);
-      prev_key = key;
+    current_time = HAL_GetTick();
+    if(current_time - previous_time > 300){
+      previous_time = current_time;
+      snake_count(&snake);
+      snake_draw(&snake);
     }
-    key = keyboard_check_key(&keyboard);
+    snake_check_direction(&snake);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
