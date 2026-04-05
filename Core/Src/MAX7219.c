@@ -48,7 +48,7 @@ void max7219_set_pixel(max7219_t *max, uint8_t x, uint8_t y){
 	if(y > 7){
 		y = 7;
 	}
-	max->buffer[y] |= 1 << x;
+	max->buffer[y] |= 1 << (7 - x);
 	max7219_write(max, MAX7219_DIGIT0_REG + y, max->buffer[y]);  
 }
 
@@ -59,7 +59,7 @@ void max7219_reset_pixel(max7219_t *max, uint8_t x, uint8_t y){
 	if(y > 7){
 		y = 7;
 	}
-	max->buffer[y] &= ~(1 << x);
+	max->buffer[y] &= ~(1 << (7 - x));
 	max7219_write(max, MAX7219_DIGIT0_REG + y, max->buffer[y]);  
 }
 
