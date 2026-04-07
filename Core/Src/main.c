@@ -173,12 +173,12 @@ int main(void)
       }
 
       break;
-      case PAUSE:
-        if(snake_check_keyboard(&snake) != keyENTER && snake_check_keyboard(&snake) != 0){
-          previous_time = current_time;
-          game_state = GAME;
-        }
-        break; 
+    case PAUSE:
+      if(snake_check_keyboard(&snake) != keyENTER && snake_check_keyboard(&snake) != 0){
+        previous_time = current_time;
+        game_state = GAME;
+      }
+      break; 
     }
     current_time = HAL_GetTick();
 
